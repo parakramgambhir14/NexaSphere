@@ -36,7 +36,7 @@ public class EventEntity {
     private String description;
 
     @NotBlank
-    @Pattern(regexp = "upcoming|ongoing|completed|cancelled")
+    @Pattern(regexp = "^(upcoming|ongoing|completed|cancelled)$")
     private String status;
 
     private String icon = "📌";
@@ -45,7 +45,7 @@ public class EventEntity {
     @CollectionTable(name = "event_tags", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "tags")
     @Size(max = 12)
-    private List<@Size(max = 40) String> tags = new ArrayList<>();
+    private List<@NotBlank @Size(max = 40) String> tags = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -66,5 +66,17 @@ public class EventEntity {
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-|-$", "");
         return slug.isEmpty() ? "event-" + System.currentTimeMillis() : slug;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void cleanTags() {
+        if (tags != null) {
+            tags = tags.stream()
+                    .filter(t -> t != null && !t.trim().isEmpty())
+                    .map(String::trim)
+                    .distinct()
+                    .toList();
+        }
     }
 }
