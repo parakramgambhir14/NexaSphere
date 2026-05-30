@@ -39,6 +39,7 @@ public class EventEntity {
     @Pattern(regexp = "^(upcoming|ongoing|completed|cancelled)$")
     private String status;
 
+    @Size(max = 10)
     private String icon = "📌";
 
     @ElementCollection(fetch = FetchType.EAGER)
